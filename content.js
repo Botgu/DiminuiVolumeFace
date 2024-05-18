@@ -1,31 +1,33 @@
 function setVolumeOnAllVideos(volume) {
-  // Encontra todos os elementos de vídeo na página
-  var videos = document.getElementsByTagName("video");
-  console.log('rodou')
-  // Define o volume de cada vídeo encontrado
+  const videos = document.getElementsByTagName("video");
   for (var i = 0; i < videos.length; i++) {
     videos[i].volume = volume;
-    console.log("Volume", videos[i].volume);
   }
 }
 
-// Reduz o volume de todos os vídeos para 50%
-setVolumeOnAllVideos(0.1);
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "facebookOpened") {
-    setVolumeOnAllVideos(0.1);
+const observer = new MutationObserver((mutations) => {
+  for (const mutation of mutations) {
+    if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+      for (const addedNode of mutation.addedNodes) {
+        if (addedNode.tagName === 'VIDEO') {
+          setVolumeOnAllVideos(0.8);
+        }
+      }
+    }
   }
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === "diminuirVolume") {
-    setVolumeOnAllVideos(0.1);
-  }
+observer.observe(document.body, {
+  childList: true,
+  subtree: true
 });
 
-document
-  .getElementById("diminuirVolumeButton")
-  .addEventListener("click", () => {
-    chrome.runtime.sendMessage({ type: "diminuirVolume" });
-  });
+setInterval(() => {
+  const videos = document.querySelectorAll('video');
+  for (const video of videos) {
+    if (!video.dataset.processed) {
+      setVolumeOnAllVideos(0.1);
+      video.dataset.processed = true;
+    }
+  }
+}, 500);

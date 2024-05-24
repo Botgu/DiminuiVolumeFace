@@ -1,8 +1,8 @@
 function setVolumeOnAllVideos(volume) {
-  const videos = document.getElementsByTagName("video");
-  for (var i = 0; i < videos.length; i++) {
-    videos[i].volume = volume;
-  }
+  const videos = document.querySelectorAll("video");
+  videos.forEach(video => {
+    video.volume = volume;
+  });
 }
 
 const observer = new MutationObserver((mutations) => {
